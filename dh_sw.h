@@ -249,11 +249,11 @@ typedef struct {
 
 SC_MODULE (dh_sw)
 {
-  sc_fifo_out <NN_DIGIT> to_hw0, to_hw1, to_hw2;
-  sc_fifo_out <NN_HALF_DIGIT> to_hw3;
-  
-  sc_fifo_in <NN_DIGIT> from_hw0, from_hw1;
-  sc_fifo_in <NN_HALF_DIGIT> from_hw2;
+  sc_out<NN_DIGIT> to_hw0, to_hw1, to_hw2;
+  sc_out<NN_HALF_DIGIT> to_hw3;
+
+  sc_in<NN_DIGIT> from_hw0, from_hw1;
+  sc_in<NN_HALF_DIGIT> from_hw2;
 
   sc_in <bool> hw_done; 
   sc_out <bool> hw_enable;
