@@ -11,7 +11,11 @@ void dh_hw::process_hw()
   load_inputs.write(false);
   load_result.write(false);
   
-  for (;;) {  
+  for (;;) {
+      wait();//clock wait 
+
+      if (!load_inputs_internal.read())//control trigger
+          continue;
   
 	    // Read inputs (blocking FIFO access)
 	    t[0] = from_sw0.read();
