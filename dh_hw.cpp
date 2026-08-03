@@ -25,14 +25,25 @@ void dh_hw::process_hw()
       /*** Begin: Required part (to do: Datapath + Control) ***/
       cHigh = (NN_HALF_DIGIT)HIGH_HALF (c);
       cLow = (NN_HALF_DIGIT)LOW_HALF (c);
+
+      dp_t0_in.write(t[0]);
+      dp_t1_in.write(t[1]);
+      dp_c_in.write(c);
+      dp_ah_in.write(aHigh);
+      load_inputs.write(true);
+
+      wait(clock.posedge_event());
+      load_inputs.write(false);
+      load_result.write(true);
+
+      wait(clock.posedge_event());
+      load_result.write(false);
   
-      u = (NN_DIGIT)aHigh * (NN_DIGIT)cLow;
-      v = (NN_DIGIT)aHigh * (NN_DIGIT)cHigh;
-      
-      if ((t[0] -= TO_HIGH_HALF (u)) > (MAX_NN_DIGIT - TO_HIGH_HALF (u))) t[1]--;
-      
-      t[1] -= HIGH_HALF (u);
-      t[1] -= v;
+      wait(SC_ZERO_TIME);
+      wait(SC_ZERO_TIME);
+
+      t[0] = dp_t0_out.read();
+      t[1] = dp_t1_out.read();
       /*** End: Required part ***/
 
       /*** Begin: Bonus part (optional: Extra Datapath + Extra Control) ***/
