@@ -28,18 +28,26 @@ SC_MODULE (dh_hw){
   
   // Reserved for the bonus and final output registers
   sc_signal<bool> bonus_ready_internal;
+  sc_signal<bool> bonus_condition_internal;
   sc_signal<bool> load_output_internal;
 
   dh_datapath DP;
   dh_controller controller;
+  reg32 t0_output_reg, t1_output_reg;
+  reg16 ah_output_reg;
 
-  void process_hw();
+
   
-SC_CTOR (dh_hw) : DP("DATAPATH"), controller("CONTROLLER")
+SC_CTOR (dh_hw)
+      : DP("DATAPATH"), controller("CONTROLLER"),
+        t0_output_reg("t0_output_reg"),
+        t1_output_reg("t1_output_reg"),
+        ah_output_reg("ah_output_reg")
   {
     DP.clock(clock);
     DP.load_inputs(load_inputs_internal);
     DP.load_result(load_result_internal);
+    DP.load_bonus(bonus_ready_internal);
 
     DP.t0_in(from_sw0);
     DP.t1_in(from_sw1);
@@ -50,10 +58,12 @@ SC_CTOR (dh_hw) : DP("DATAPATH"), controller("CONTROLLER")
     DP.t1_out(dp_t1_out);
     DP.c_out(dp_c_out);
     DP.ah_out(dp_ah_out);
+    DP.bonus_condition(bonus_condition_internal);
 
-    // Controller connections
+   // Controller connections
     controller.clock(clock);
     controller.hw_enable(hw_enable);
+    controller.bonus_condition(bonus_condition_internal);
     controller.hw_done(hw_done);
     
     controller.load_inputs(load_inputs_internal);
@@ -61,7 +71,21 @@ SC_CTOR (dh_hw) : DP("DATAPATH"), controller("CONTROLLER")
     controller.bonus_ready(bonus_ready_internal);
     controller.load_output(load_output_internal);
     
-    SC_CTHREAD(process_hw, clock.pos());
+    // Final output registers hold stable values while hw_done is asserted.
+    t0_output_reg.clock(clock);
+    t0_output_reg.load(load_output_internal);
+    t0_output_reg.IN(dp_t0_out);
+    t0_output_reg.OUT(to_sw0);
+  
+    t1_output_reg.clock(clock);
+    t1_output_reg.load(load_output_internal);
+    t1_output_reg.IN(dp_t1_out);
+    t1_output_reg.OUT(to_sw1);
+
+    ah_output_reg.clock(clock);
+    ah_output_reg.load(load_output_internal);
+    ah_output_reg.IN(dp_ah_out);
+    ah_output_reg.OUT(to_sw2);
   }
 };
 #endif

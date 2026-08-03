@@ -8,6 +8,7 @@ enum dh_ctrl_state {
   DH_LOAD,
   DH_CALCULATE,
   DH_BONUS,
+  DH_BONUS_UPDATE,
   DH_OUTPUT,
   DH_DONE
 };
@@ -16,6 +17,7 @@ SC_MODULE(dh_controller)
 {
   sc_in_clk clock;
   sc_in<bool> hw_enable;
+  sc_in<bool> bonus_condition;
 
   sc_out<bool> load_inputs; //load input from software
   sc_out<bool> load_result; //capture result to t0 and t1 register (required part)
@@ -34,7 +36,7 @@ SC_MODULE(dh_controller)
     SC_CTHREAD(state_reg, clock.pos());
 
     SC_METHOD(state_diagram);
-    sensitive << state << hw_enable;
+    sensitive << state << hw_enable << bonus_condition;
   }
 };
 

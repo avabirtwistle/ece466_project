@@ -137,3 +137,28 @@ void buffer16::buffer_process()
 {
   OUT.write(IN.read());
 }
+
+void equal32::comp_process()
+{
+  EQ.write(A.read() == B.read());
+}
+
+void increment16::increment_process()
+{
+  OUT.write((NN_HALF_DIGIT)(IN.read() + 1u));
+}
+
+void and2::and_process()
+{
+  OUT.write(A.read() && B.read());
+}
+
+void not1::not_process()
+{
+  OUT.write(!IN.read());
+}
+
+void mux2_16::mux_process()
+{
+  OUT.write(sel.read() ? B.read() : A.read());
+}

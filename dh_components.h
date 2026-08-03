@@ -165,14 +165,76 @@ SC_MODULE(buffer32){
   }
 };
 
-SC_MODULE(buffer16){
+ SC_MODULE(buffer16) {
   sc_in<NN_HALF_DIGIT> IN;
   sc_out<NN_HALF_DIGIT> OUT;
 
   void buffer_process();
 
-  SC_CTOR(buffer16){
+  SC_CTOR(buffer16) {
     SC_METHOD(buffer_process);
+    sensitive << IN;
+  }
+};
+
+// 16-bit 2:1 multiplexer.
+SC_MODULE(mux2_16) {
+  sc_in<bool> sel;
+  sc_in<NN_HALF_DIGIT> A, B;
+  sc_out<NN_HALF_DIGIT> OUT;
+
+  void mux_process();
+
+  SC_CTOR(mux2_16) {
+    SC_METHOD(mux_process);
+    sensitive << sel << A << B;
+  }
+};
+
+SC_MODULE(equal32) {
+  sc_in<NN_DIGIT> A, B;
+  sc_out<bool> EQ;
+
+  void comp_process();
+
+  SC_CTOR(equal32) {
+    SC_METHOD(comp_process);
+    sensitive << A << B;
+  }
+};
+
+SC_MODULE(increment16) {
+  sc_in<NN_HALF_DIGIT> IN;
+  sc_out<NN_HALF_DIGIT> OUT;
+
+  void increment_process();
+
+  SC_CTOR(increment16) {
+    SC_METHOD(increment_process);
+    sensitive << IN;
+  }
+};
+
+SC_MODULE(and2) {
+  sc_in<bool> A, B;
+  sc_out<bool> OUT;
+
+  void and_process();
+
+  SC_CTOR(and2) {
+    SC_METHOD(and_process);
+    sensitive << A << B;
+  }
+};
+
+SC_MODULE(not1) {
+  sc_in<bool> IN;
+  sc_out<bool> OUT;
+
+  void not_process();
+
+  SC_CTOR(not1) {
+    SC_METHOD(not_process);
     sensitive << IN;
   }
 };

@@ -4,26 +4,30 @@
 #include "systemc.h"
 #include "digit.h"
 #include "dh_components.h"
+#include "dh_bonus.h"
 
-// Structural datapath for the required portion of NN_DigitDivHH.
+// Structural datapath for the required and bonus portions of NN_DigitDivHH.
 SC_MODULE(dh_datapath)
 {
   sc_in_clk clock;
 
   sc_in<bool> load_inputs;
   sc_in<bool> load_result;
+  sc_in<bool> load_bonus;
 
   sc_in<NN_DIGIT> t0_in, t1_in, c_in;
   sc_in<NN_HALF_DIGIT> ah_in;
 
   sc_out<NN_DIGIT> t0_out, t1_out, c_out;
   sc_out<NN_HALF_DIGIT> ah_out;
+  sc_out<bool> bonus_condition;
 
   // Register and datapath signals.
   sc_signal<NN_DIGIT> t0_q, t1_q, c_q;
   sc_signal<NN_HALF_DIGIT> ah_q;
-  sc_signal<NN_DIGIT> t0_d, t1_d;
-  sc_signal<bool> load_t;
+  sc_signal<NN_DIGIT> t0_d, t1_d, t0_selected, t1_selected;
+  sc_signal<NN_HALF_DIGIT> ah_d;
+  sc_signal<bool> load_t_base, load_t, load_ah;
 
   // C and product decomposition.
   sc_signal<NN_HALF_DIGIT> c_low, c_high;
@@ -39,11 +43,18 @@ SC_MODULE(dh_datapath)
   sc_signal<NN_DIGIT> t1_after_u;
   sc_signal<NN_DIGIT> t1_result;
 
+  // Results from one structural bonus-loop iteration.
+  sc_signal<NN_DIGIT> bonus_t0_next, bonus_t1_next;
+  sc_signal<NN_HALF_DIGIT> bonus_ah_next;
+
   // Structural component instances.
-  mux2_32 t0_mux, t1_mux;
-  or2 t_load_or;
+  mux2_32 t0_mux, t1_mux, t0_bonus_mux, t1_bonus_mux;
+  mux2_16 ah_bonus_mux;
+  or2 t_load_or, t_bonus_load_or, ah_load_or;
   reg32 t0_reg, t1_reg, c_reg;
   reg16 ah_reg;
+
+  dh_bonus_step bonus_step;
 
   split32 c_split, u_split;
   multiplier u_mult, v_mult;
@@ -59,9 +70,13 @@ SC_MODULE(dh_datapath)
 
   SC_CTOR(dh_datapath)
       : t0_mux("t0_mux"), t1_mux("t1_mux"),
-        t_load_or("t_load_or"),
+        t0_bonus_mux("t0_bonus_mux"), t1_bonus_mux("t1_bonus_mux"),
+        ah_bonus_mux("ah_bonus_mux"),
+        t_load_or("t_load_or"), t_bonus_load_or("t_bonus_load_or"),
+        ah_load_or("ah_load_or"),
         t0_reg("t0_reg"), t1_reg("t1_reg"), c_reg("c_reg"),
         ah_reg("ah_reg"),
+        bonus_step("bonus_step"),
         c_split("c_split"), u_split("u_split"),
         u_mult("u_mult"), v_mult("v_mult"),
         u_shift("u_shift"), u_high_extend("u_high_extend"),
@@ -71,7 +86,7 @@ SC_MODULE(dh_datapath)
         t0_buffer("t0_buffer"), t1_buffer("t1_buffer"),
         c_buffer("c_buffer"), ah_buffer("ah_buffer")
   {
-    // Input/result selection for the two updated registers.
+    // Select software inputs or required-part results.
     t0_mux.A(t0_in);
     t0_mux.B(t0_result);
     t0_mux.sel(load_result);
@@ -82,19 +97,43 @@ SC_MODULE(dh_datapath)
     t1_mux.sel(load_result);
     t1_mux.OUT(t1_d);
 
+    // Select one bonus-loop result when load_bonus is asserted.
+    t0_bonus_mux.A(t0_d);
+    t0_bonus_mux.B(bonus_t0_next);
+    t0_bonus_mux.sel(load_bonus);
+    t0_bonus_mux.OUT(t0_selected);
+
+    t1_bonus_mux.A(t1_d);
+    t1_bonus_mux.B(bonus_t1_next);
+    t1_bonus_mux.sel(load_bonus);
+    t1_bonus_mux.OUT(t1_selected);
+
+    ah_bonus_mux.A(ah_in);
+    ah_bonus_mux.B(bonus_ah_next);
+    ah_bonus_mux.sel(load_bonus);
+    ah_bonus_mux.OUT(ah_d);
+
+    // Load the working registers for input, required result, or bonus update.
     t_load_or.A(load_inputs);
     t_load_or.B(load_result);
-    t_load_or.OUT(load_t);
+    t_load_or.OUT(load_t_base);
 
-    // Clocked input/result registers.
+    t_bonus_load_or.A(load_t_base);
+    t_bonus_load_or.B(load_bonus);
+    t_bonus_load_or.OUT(load_t);
+
+    ah_load_or.A(load_inputs);
+    ah_load_or.B(load_bonus);
+    ah_load_or.OUT(load_ah);
+
     t0_reg.clock(clock);
     t0_reg.load(load_t);
-    t0_reg.IN(t0_d);
+    t0_reg.IN(t0_selected);
     t0_reg.OUT(t0_q);
 
     t1_reg.clock(clock);
     t1_reg.load(load_t);
-    t1_reg.IN(t1_d);
+    t1_reg.IN(t1_selected);
     t1_reg.OUT(t1_q);
 
     c_reg.clock(clock);
@@ -103,15 +142,27 @@ SC_MODULE(dh_datapath)
     c_reg.OUT(c_q);
 
     ah_reg.clock(clock);
-    ah_reg.load(load_inputs);
-    ah_reg.IN(ah_in);
+    ah_reg.load(load_ah);
+    ah_reg.IN(ah_d);
     ah_reg.OUT(ah_q);
 
-    // cLow/cHigh and the two combinational multipliers.
+    // Split c once for both the required and bonus datapaths.
     c_split.IN(c_q);
     c_split.LOW(c_low);
     c_split.HIGH(c_high);
 
+    // Structural bonus block computes one loop iteration at a time.
+    bonus_step.t0(t0_q);
+    bonus_step.t1(t1_q);
+    bonus_step.c_low(c_low);
+    bonus_step.c_high(c_high);
+    bonus_step.a_high(ah_q);
+    bonus_step.t0_next(bonus_t0_next);
+    bonus_step.t1_next(bonus_t1_next);
+    bonus_step.a_high_next(bonus_ah_next);
+    bonus_step.loop_condition(bonus_condition);
+
+    // Required-part multiplication.
     u_mult.A(ah_q);
     u_mult.B(c_low);
     u_mult.OUT(u);
@@ -120,7 +171,6 @@ SC_MODULE(dh_datapath)
     v_mult.B(c_high);
     v_mult.OUT(v);
 
-    // Form TO_HIGH_HALF(u) and HIGH_HALF(u).
     u_split.IN(u);
     u_split.LOW(u_low);
     u_split.HIGH(u_high);
@@ -156,7 +206,7 @@ SC_MODULE(dh_datapath)
     t1_v_sub.B(v);
     t1_v_sub.OUT(t1_result);
 
-    // Drive the required-part outputs from the registered values.
+    // Drive the datapath outputs from the registered working values.
     t0_buffer.IN(t0_q);
     t0_buffer.OUT(t0_out);
 

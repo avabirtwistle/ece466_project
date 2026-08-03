@@ -43,13 +43,21 @@ void dh_controller::state_diagram()
       break;
 
     case DH_BONUS:
+      // Check whether another bonus-loop iteration is required.
+      if (bonus_condition.read())
+        next_state.write(DH_BONUS_UPDATE);
+      else
+        next_state.write(DH_OUTPUT);
+      break;
+
+    case DH_BONUS_UPDATE:
+      // Capture one structural bonus iteration, then check again.
       bonus_ready.write(true);
-      next_state.write(DH_OUTPUT);
+      next_state.write(DH_BONUS);
       break;
 
     case DH_OUTPUT:
       //keep bonus valid while capturing
-      bonus_ready.write(true);
       load_output.write(true);
       next_state.write(DH_DONE);
       break;
