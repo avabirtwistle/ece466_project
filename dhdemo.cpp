@@ -3,7 +3,9 @@
 #include "dh_sw.h"
 #include "dh_hw.h"
 
-int sc_main(int argc , char *argv[]) {
+int sc_main(int argc, char *argv[])
+{
+  sc_clock clock("clock", 10, SC_NS);
 
   // Important: All FIFOs are of size 1.
   sc_fifo <NN_DIGIT> ch0(1), ch1(1), ch2(1), ch4(1), ch5(1);
@@ -25,6 +27,7 @@ int sc_main(int argc , char *argv[]) {
 	DH_SW.hw_done(done);               // hardware-done input
 		
 	dh_hw DH_HW("DH_Hardware_Module");
+	DH_HW.clock(clock);
 	DH_HW.from_sw0(ch0);               // input0 from software
 	DH_HW.from_sw1(ch1);               // input1 from software
 	DH_HW.from_sw2(ch2);               // input2 from software
