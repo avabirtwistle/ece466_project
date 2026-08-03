@@ -1,0 +1,6 @@
+*.o
+*.x
+*.vcd
+core
+*~
+.DS_Store
