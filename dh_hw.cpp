@@ -5,7 +5,7 @@
 void dh_hw::process_hw()
 {
 
-  NN_DIGIT t[2], c, u, v;
+  NN_DIGIT t[2], c;
   NN_HALF_DIGIT aHigh, cLow, cHigh;
 
   load_inputs.write(false);
