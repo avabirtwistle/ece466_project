@@ -5,7 +5,6 @@
 
 int sc_main(int argc, char *argv[])
 {
-  sc_clock clock("clock", 10, SC_NS);
 
     //signals
 	sc_clock clock("clock", 10, SC_NS);
@@ -39,7 +38,6 @@ int sc_main(int argc, char *argv[])
  	DH_HW.to_sw2(ch6);                 // output to software
 	DH_HW.hw_enable(enable);           // hardware-enable input
 	DH_HW.hw_done(done);               // hardware-done output
-	DH_HW.clock(clock);
 
 	sc_trace_file *trace =
     sc_create_vcd_trace_file("full_handshake");

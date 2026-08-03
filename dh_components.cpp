@@ -9,7 +9,6 @@
  *   load = false -> OUT retains its previous value
  *
  */
-SC_MODULE(reg32)
 void reg32::reg_process()
 {
   while (1) {

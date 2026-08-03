@@ -4,6 +4,7 @@
 #include "systemc.h"
 #include "digit.h"
 #include "dh_controller.h"
+#include "dh_datapath.h"
 
 SC_MODULE (dh_hw){
   sc_in_clk clock;
@@ -34,7 +35,7 @@ SC_MODULE (dh_hw){
 
   void process_hw();
   
-  SC_CTOR (dh_hw) : DP("DATAPATH") : controller("CONTROLLER")
+SC_CTOR (dh_hw) : DP("DATAPATH"), controller("CONTROLLER")
   {
     DP.clock(clock);
     DP.load_inputs(load_inputs_internal);

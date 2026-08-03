@@ -7,9 +7,6 @@ void dh_hw::process_hw()
 
   NN_DIGIT t[2], c;
   NN_HALF_DIGIT aHigh, cLow, cHigh;
-
-  load_inputs.write(false);
-  load_result.write(false);
   
   for (;;) {
       wait();//clock wait 
@@ -27,30 +24,18 @@ void dh_hw::process_hw()
 	    // Original code from NN_DigitDivHH():	
 
       /*** Begin: Required part (to do: Datapath + Control) ***/
-      cHigh = (NN_HALF_DIGIT)HIGH_HALF (c);
-      cLow = (NN_HALF_DIGIT)LOW_HALF (c);
+    if (!load_output_internal.read())
+        continue;
 
-      dp_t0_in.write(t[0]);
-      dp_t1_in.write(t[1]);
-      dp_c_in.write(c);
-      dp_ah_in.write(aHigh);
-      load_inputs.write(true);
-
-      wait(clock.posedge_event());
-      load_inputs.write(false);
-      load_result.write(true);
-
-      wait(clock.posedge_event());
-      load_result.write(false);
-  
-      wait(SC_ZERO_TIME);
-      wait(SC_ZERO_TIME);
-
-      t[0] = dp_t0_out.read();
-      t[1] = dp_t1_out.read();
+        t[0] = dp_t0_out.read();
+        t[1] = dp_t1_out.read();
+        c = dp_c_out.read();
+        aHigh = dp_ah_out.read();
       /*** End: Required part ***/
 
       /*** Begin: Bonus part (optional: Extra Datapath + Extra Control) ***/
+    cHigh = (NN_HALF_DIGIT)HIGH_HALF(c);
+    cLow = (NN_HALF_DIGIT)LOW_HALF(c);
       while ((t[1] > cHigh) || ((t[1] == cHigh) && (t[0] >= TO_HIGH_HALF (cLow)))) {
           if ((t[0] -= TO_HIGH_HALF (cLow)) > MAX_NN_DIGIT - TO_HIGH_HALF (cLow)) t[1]--;
           t[1] -= cHigh;

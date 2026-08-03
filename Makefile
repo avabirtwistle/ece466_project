@@ -10,7 +10,7 @@ LIBS := -lsystemc -lm
 
 
 EXE     := main.x
-SOURCES := dhdemo.cpp dh_sw.cpp dh_hw.cpp dh_components.cpp
+SOURCES := dhdemo.cpp dh_sw.cpp dh_hw.cpp dh_components.cpp dh_controller.cpp
 HEADERS := $(wildcard *.h)
 OBJECTS := $(SOURCES:%.cpp=%.o)
 MAKEFILE_FILE := Makefile
