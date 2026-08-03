@@ -51,6 +51,7 @@ int sc_main(int argc, char *argv[])
 	sc_trace(trace, DH_HW.bonus_ready_internal, "bonus_ready");
 	sc_trace(trace, DH_HW.load_output_internal, "load_output");
 	sc_start();
+	sc_close_vcd_trace_file(trace);
 
 	return(0);
  
