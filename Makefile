@@ -16,8 +16,8 @@ OBJECTS := $(SOURCES:%.cpp=%.o)
 $(EXE): $(OBJECTS) Makefile 
 	$(CC) $(CFLAGS) $(LDIR) -o $@ $(OBJECTS) $(LIBS) 2>&1 | c++filt
 
-$(OBJECTS): $(SOURCES) $(HEADERS) Makefile
-	$(CC) $(CFLAGS) $(IDIR) -c $(SOURCES)
+%.o: %.cpp $(HEADERS) Makefile
+	$(CC) $(CFLAGS) $(IDIR) -c $< -o $@
 
 
 .PHONY: all, clean

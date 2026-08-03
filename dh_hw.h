@@ -34,8 +34,8 @@ SC_MODULE (dh_hw){
     controller.bonus_ready(bonus_ready_internal);
     controller.load_output(load_output_internal);
     controller.hw_done(hw_done);
-    
-    SC_THREAD (process_hw, clock.pos());
+
+    SC_CTHREAD (process_hw, clock.pos());
   }
   
 };
