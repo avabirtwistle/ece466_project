@@ -262,6 +262,7 @@ SC_MODULE (dh_sw)
   
   SC_CTOR (dh_sw) {
     SC_THREAD (process_sw);
+    sensitive << hw_done; // Trigger on hardware done signal
   }
 
 /*********************************************************************/
