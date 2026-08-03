@@ -5,9 +5,12 @@
 
 int sc_main(int argc , char *argv[]) {
 
-  // Important: All FIFOs are of size 1.
-  sc_fifo <NN_DIGIT> ch0(1), ch1(1), ch2(1), ch4(1), ch5(1);
-  sc_fifo <NN_HALF_DIGIT> ch3(1), ch6(1);
+    //signals
+	sc_clock clock("clock", 10, SC_NS);
+
+	sc_signal<NN_DIGIT> ch0, ch1, ch2, ch4, ch5;
+	sc_signal<NN_HALF_DIGIT> ch3, ch6;
+	sc_signal<bool> enable, done;
 	
 	sc_signal <bool> enable, done;
 	enable.write(false);
@@ -34,7 +37,8 @@ int sc_main(int argc , char *argv[]) {
  	DH_HW.to_sw2(ch6);                 // output to software
 	DH_HW.hw_enable(enable);           // hardware-enable input
 	DH_HW.hw_done(done);               // hardware-done output
-
+	DH_HW.clock(clock);
+	
 	sc_start();
 
 	return(0);
