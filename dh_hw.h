@@ -3,6 +3,7 @@
 
 #include "systemc.h"
 #include "digit.h"
+#include "dh_controller.h"
 
 SC_MODULE (dh_hw)
 {
