@@ -462,19 +462,33 @@ NN_DIGIT t[2],
 NN_DIGIT c
 )
 {
+  //put our input on the output ports to hardware
   to_hw0.write(t[0]);
   to_hw1.write(t[1]);
   to_hw2.write(c);
   to_hw3.write(aHigh);
   
+  //signal we want to use hardware
+  hw_enable.write(true);
+
+  //wait for the hardware to assert done
+  while (!hw_done.read())
+    wait();
 // This computation is now performed in hardware.
 /* Synchronization is done via blocking read/write 
    (to be replaced by handshaking). */
 
+  //when we reach here the hardware has finished
   t[0] = from_hw0.read();
   t[1] = from_hw1.read();
   aHigh = from_hw2.read();
   
+  //once we get result signal to hardware we are done
+  hw_enable.write(false);
+
+  //wait for hardware to deassert done (signal back)
+  while (hw_done.read())
+      wait();
 }
 
 /*** This function computes reference values for verification ***/
