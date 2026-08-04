@@ -1,11 +1,13 @@
-SYSTEMC ?= /opt/systemc
+SYSTEMC ?= /usr/local/systemc-3.0.1
 
 CC     := /usr/bin/g++
 CFLAGS := -O2 -Wall -Wextra -pedantic -std=c++17
 
 IDIR := -I ./ -isystem $(SYSTEMC)/include
-LDIR := -L ./ -L $(SYSTEMC)/lib64 -L $(SYSTEMC)/lib \
-        -Wl,-rpath,$(SYSTEMC)/lib64 -Wl,-rpath,$(SYSTEMC)/lib
+
+LDIR := -L ./ -L $(SYSTEMC)/lib-linux64 \
+        -Wl,-rpath,$(SYSTEMC)/lib-linux64
+
 LIBS := -lsystemc -lm
 
 
