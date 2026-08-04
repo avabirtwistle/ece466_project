@@ -14,7 +14,6 @@ int sc_main(int argc, char *argv[])
 	sc_signal<bool> enable, done;
 
 	enable.write(false);
-	done.write(false);
 	
 	dh_sw DH_SW("DH_Software_Module");
 	DH_SW.to_hw0(ch0);                 // output0 to hardware
