@@ -57,7 +57,7 @@ void dh_controller::state_diagram()
       break;
 
     case DH_OUTPUT:
-      //keep bonus valid while capturing
+      // Capture the completed results in the output registers.
       load_output.write(true);
       next_state.write(DH_DONE);
       break;

@@ -18,7 +18,7 @@ SC_MODULE(dh_datapath)
   sc_in<NN_DIGIT> t0_in, t1_in, c_in;
   sc_in<NN_HALF_DIGIT> ah_in;
 
-  sc_out<NN_DIGIT> t0_out, t1_out, c_out;
+  sc_out<NN_DIGIT> t0_out, t1_out;
   sc_out<NN_HALF_DIGIT> ah_out;
   sc_out<bool> bonus_condition;
 
@@ -65,7 +65,7 @@ SC_MODULE(dh_datapath)
   bool_to_digit borrow_extend;
   sub32 t0_sub, t1_borrow_sub, t1_u_sub, t1_v_sub;
 
-  buffer32 t0_buffer, t1_buffer, c_buffer;
+  buffer32 t0_buffer, t1_buffer;
   buffer16 ah_buffer;
 
   SC_CTOR(dh_datapath)
@@ -84,7 +84,7 @@ SC_MODULE(dh_datapath)
         t0_sub("t0_sub"), t1_borrow_sub("t1_borrow_sub"),
         t1_u_sub("t1_u_sub"), t1_v_sub("t1_v_sub"),
         t0_buffer("t0_buffer"), t1_buffer("t1_buffer"),
-        c_buffer("c_buffer"), ah_buffer("ah_buffer")
+        ah_buffer("ah_buffer")
   {
     // Select software inputs or required-part results.
     t0_mux.A(t0_in);
@@ -212,9 +212,6 @@ SC_MODULE(dh_datapath)
 
     t1_buffer.IN(t1_q);
     t1_buffer.OUT(t1_out);
-
-    c_buffer.IN(c_q);
-    c_buffer.OUT(c_out);
 
     ah_buffer.IN(ah_q);
     ah_buffer.OUT(ah_out);

@@ -19,7 +19,7 @@ SC_MODULE (dh_hw){
   sc_out <bool> hw_done;
 
   // Required-datapath outputs
-  sc_signal<NN_DIGIT> dp_t0_out, dp_t1_out, dp_c_out;
+  sc_signal<NN_DIGIT> dp_t0_out, dp_t1_out;
   sc_signal<NN_HALF_DIGIT> dp_ah_out;
 
   // Controller-to-datapath control signals
@@ -56,7 +56,6 @@ SC_CTOR (dh_hw)
 
     DP.t0_out(dp_t0_out);
     DP.t1_out(dp_t1_out);
-    DP.c_out(dp_c_out);
     DP.ah_out(dp_ah_out);
     DP.bonus_condition(bonus_condition_internal);
 

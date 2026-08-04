@@ -21,7 +21,7 @@ SC_MODULE(dh_controller)
 
   sc_out<bool> load_inputs; //load input from software
   sc_out<bool> load_result; //capture result to t0 and t1 register (required part)
-  sc_out<bool> bonus_ready; //indicate when bonus input is ready
+  sc_out<bool> bonus_ready; // load one bonus-loop iteration
   sc_out<bool> load_output; //capture result to output registers (bonus part)
   sc_out<bool> hw_done; //tell software hardware is done and output registers are valid
 
